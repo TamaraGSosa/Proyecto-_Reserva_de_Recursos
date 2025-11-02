@@ -10,3 +10,12 @@ Permite que los usuarios internos y externos puedan reservar recursos de la inst
 Digitalizar el sistema de reservas de recursos de la institución, permitiendo que los **usuarios internos** hagan reservas y que los **administradores** puedan gestionar recursos, usuarios y reservas de manera eficiente y centralizada.
 
 ---
+## 🛠 Tecnologías utilizadas
+
+- **Frontend:**
+- **Backend:** 
+- **Base de datos:** 
+- **Autenticación:** 
+- **Control de versiones:** Git / GitHub  
+
+---
