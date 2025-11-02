@@ -12,18 +12,25 @@ Digitalizar el sistema de reservas de recursos de la institución, permitiendo q
 ---
 ## 🛠 Tecnologías utilizadas
 
-- **Frontend:**
-  AdminLTE 3 – Plantilla de panel de administración basada en Bootstrap 4.6, usada para el diseño del dashboard y vistas administrativas.
-  Bootstrap 4.6 – Framework CSS para diseño responsive.
-- **Backend:**
-- Laravel 10 (PHP 8.1+) – Framework principal para lógica del sistema y manejo de base de datos.
-- Laravel/UI – Paquete de Laravel para autenticación básica (login, registro, reset password).
-- **Dependencias:**
-- Composer – Manejador de dependencias de PHP.
-- Node.js + npm – Para compilar CSS/JS y manejar assets con Vite.
-- **Base de datos:**
-- MySQL
-- **Autenticación:** 
-- **Control de versiones:** Git / GitHub  
+### 🎨 Frontend
+- **AdminLTE 3** – Plantilla de panel de administración basada en Bootstrap 4.6, usada para el diseño del dashboard y vistas administrativas.  
+- **Bootstrap 4.6** – Framework CSS para diseño responsive.
+
+### 💻 Backend
+- **Laravel 10 (PHP 8.1+)** – Framework principal para la lógica del sistema y manejo de base de datos.  
+- **Laravel/UI** – Paquete de Laravel para autenticación básica (login, registro, reset password).
+
+### 📦 Dependencias
+- **Composer** – Manejador de dependencias de PHP.  
+- **Node.js + npm** – Para compilar CSS/JS y manejar assets con Vite.
+
+### 🗄 Base de datos
+- **MySQL** – Motor de base de datos para guardar usuarios, reservas y recursos.
+
+### 🔐 Autenticación
+- Sistema de autenticación generado con **Laravel/UI**, compatible con panel AdminLTE.
+
+### 🔀 Control de versiones
+- **Git / GitHub** – Para manejo de ramas, commits y colaboración en equipo.
 
 ---
