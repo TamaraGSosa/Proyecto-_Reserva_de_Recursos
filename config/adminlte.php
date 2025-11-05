@@ -314,22 +314,23 @@ return [
      
         [
             'text' => 'Gestión de Recursos',
-            'url' => '#',
+            'route' => 'resources.index',
             'icon'=>'fas fa-boxes',
             'can' => 'gestionar_recursos',
         ],
-          [
+        [
             'text' => 'Gestión de Reservas',
             'url' => '#',
             'icon'=>'fas fa-calendar-check',
             'can' => 'gestionar_reservas',
         ],
-          [
+        [
             'text' => 'Gestión de Usuarios',
             'url' => '#',
             'icon'=>'fas fa-users',
             'can' => 'gestionar_usuarios',
         ],
+        
         
 
       
