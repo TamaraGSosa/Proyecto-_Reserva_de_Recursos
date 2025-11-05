@@ -21,8 +21,9 @@ class DatabaseSeeder extends Seeder
         $this->call(
             UserSeeder::class
         );
-        $this->call(StatusResource::class);
         $this->call(CategorySeeder::class);
+        $this->call(StatusResourceSeeder::class);
+
       
         
         Resource::factory(20)->create();
