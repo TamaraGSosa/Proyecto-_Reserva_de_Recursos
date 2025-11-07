@@ -17,4 +17,8 @@ class StatusResource extends Model
     public function resources(){
         return $this->hasMany(Resource::class,'status_resource_id');
     }
+     public function state()
+    {
+        return $this->belongsTo(StatusResource::class, 'status_resource_id');
+    }
 }

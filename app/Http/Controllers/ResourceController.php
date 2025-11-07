@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Resource;
+use App\Models\StatusResource;
 use Illuminate\Http\Request;
+use PHPUnit\Logging\OpenTestReporting\Status;
 
 class ResourceController extends Controller
 {
@@ -11,38 +14,24 @@ class ResourceController extends Controller
      * Display a listing of the resource.
      */
     public function index(Request $request)
-{
-    // Iniciamos la consulta
-    $query = \App\Models\Resource::query();
+    {
+        $categories = Category::all(); // solo categorías
+        $status_resources = StatusResource::all(); // solo estados
+        $resources = Resource::all(); // solo recursos, sin relaciones
 
-    // 🔍 Filtros (opcionales)
-    if ($request->filled('name')) {
-        $query->where('name', 'like', '%' . $request->name . '%');
+        return view('panel.resource.index', compact('categories', 'status_resources', 'resources'));
     }
-
-    if ($request->filled('status_resource_id')) {
-        $query->where('status_resource_id', $request->status_resource_id);
-    }
-
-    if ($request->filled('category_id')) {
-        $query->where('category_id', $request->category_id);
-    }
-
-    // 📄 Paginación (15 por página)
-    $resources = $query->orderBy('id', 'desc')->paginate(15);
-
-    // 🔄 Mantener los filtros en la paginación
-    $resources->appends($request->all());
-
-    return view('panel.resource.index', compact('resources'));
-}
 
     /**
      * Show the form for creating a new resource.
      */
     public function create()
     {
-        //
+        $resource = new Resource();
+        $categories = Category::get();
+        $status_resources = StatusResource::get();
+
+        return view('panel.resource.create', compact('resource', 'categories', 'status_resources'));
     }
 
     /**
@@ -50,7 +39,15 @@ class ResourceController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $resource=new Resource();
+        $resource->name=$request->get('name');
+        $resource->marca=$request->get('marca');
+        $resource->description=$request->get('description');
+        $resource->status_resource_id=$request->get('status_resource_id');
+        $resource->category_id=$request->get('category_id');
+
+        $resource->save();
+          return redirect()->route('resources.index')->with('success', 'Recurso creado correctamente');
     }
 
     /**
