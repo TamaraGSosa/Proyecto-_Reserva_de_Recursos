@@ -374,7 +374,7 @@ return [
 
     'plugins' => [
         'Datatables' => [
-            'active' => false,
+            'active' => true,
             'files' => [
                 [
                     'type' => 'js',
@@ -393,6 +393,21 @@ return [
                 ],
             ],
         ],
+        'DataTablesResponsive' => [
+                'active' => true,
+                'files' => [
+                    [
+                        'type' => 'js',
+                        'asset' => false,
+                        'location' => '//cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js',
+                    ],
+                    [
+                        'type' => 'css',
+                        'asset' => false,
+                        'location' => '//cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap4.min.css',
+                    ],
+                ],
+            ],
         'Select2' => [
             'active' => false,
             'files' => [
