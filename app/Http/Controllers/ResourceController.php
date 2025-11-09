@@ -39,15 +39,15 @@ class ResourceController extends Controller
      */
     public function store(Request $request)
     {
-        $resource=new Resource();
-        $resource->name=$request->get('name');
-        $resource->marca=$request->get('marca');
-        $resource->description=$request->get('description');
-        $resource->status_resource_id=$request->get('status_resource_id');
-        $resource->category_id=$request->get('category_id');
+        $resource = new Resource();
+        $resource->name = $request->get('name');
+        $resource->marca = $request->get('marca');
+        $resource->description = $request->get('description');
+        $resource->status_resource_id = $request->get('status_resource_id');
+        $resource->category_id = $request->get('category_id');
 
         $resource->save();
-          return redirect()->route('resources.index')->with('success', 'Recurso creado correctamente');
+        return redirect()->route('resources.index')->with('success', 'Recurso creado correctamente');
     }
 
     /**
@@ -61,24 +61,34 @@ class ResourceController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Resource $resource)
+    public function json(Resource $resource)
     {
-        //
+        $resource->load('status', 'category'); // carga relaciones
+        return response()->json($resource);
     }
+
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, Resource $resource)
     {
-        //
+        $resource->name = $request->get('name');
+        $resource->marca = $request->get('marca');
+        $resource->description = $request->get('description');
+        $resource->status_resource_id = $request->get('status_resource_id');
+        $resource->category_id = $request->get('category_id');
+
+        $resource->update();
+
+        return redirect()->route('resources.index')
+            ->with('success', 'Recurso "' . $resource->name . '" actualizado exitosamente.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Resource $resource)
     {
-        //
+        $resource->delete();
+        return redirect()->route('resources.index')
+            ->with('success', 'Recurso eliminado exitosamente.');
     }
 }
