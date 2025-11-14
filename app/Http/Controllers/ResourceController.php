@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Category;
+use App\Models\ReservationResource;
 use App\Models\Resource;
 use App\Models\StatusResource;
 use Illuminate\Http\Request;
-use PHPUnit\Logging\OpenTestReporting\Status;
+use Illuminate\Support\Facades\DB; // <-- para DB::table()
+use Illuminate\Support\Facades\Log;
+// <-- para Request
+
 
 class ResourceController extends Controller
 {
@@ -91,4 +95,36 @@ class ResourceController extends Controller
         return redirect()->route('resources.index')
             ->with('success', 'Recurso eliminado exitosamente.');
     }
+public function available(Request $request)
+{
+   $start = str_replace('T', ' ', $request->start_time) . ':00';
+   $end = str_replace('T', ' ', $request->end_time) . ':00';
+   $excludeReservationId = $request->reservation_id; // opcional
+
+   try {
+       $query = DB::table('reservation_resources')
+           ->join('reservations', 'reservation_resources.reservation_id', '=', 'reservations.id')
+           ->join('status_reservations', 'reservations.status_reservation_id', '=', 'status_reservations.id')
+           ->whereIn('status_reservations.name', ['Pendiente', 'En curso'])
+           ->where(function($q) use($start, $end){
+               $q->where('reservations.start_time', '<', $end)
+                 ->where('reservations.end_time', '>', $start);
+           });
+
+       if ($excludeReservationId) {
+           $query->where('reservations.id', '!=', $excludeReservationId);
+       }
+
+       $occupiedIds = $query->pluck('reservation_resources.resource_id')->toArray();
+
+       $available = Resource::whereNotIn('id', $occupiedIds)->get();
+
+       return response()->json($available);
+
+   } catch (\Exception $e) {
+       return response()->json(['error' => $e->getMessage()], 500);
+   }
+}
+
+
 }

@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\Person;
+use App\Models\Profile;
 use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
@@ -14,15 +16,52 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        // Administrador
         User::create([
             'name' => 'Admin',
             'email' => 'admin@reserva.com',
             'password' => Hash::make('123456')
         ])->assignRole('administrador');
-        User::create([
+
+        // Personal 1
+        $user1 = User::create([
             'name' => 'personal1',
             'email' => 'personal1@personal.com',
             'password' => Hash::make('123456')
-        ])->assignRole('personal');
+        ]);
+        $user1->assignRole('personal');
+
+        // Crear persona y profile para personal1
+        $person1 = Person::create([
+            'DNI' => '12345678',
+            'first_name' => 'Juan',
+            'last_name' => 'Pérez'
+        ]);
+
+        Profile::create([
+            'person_id' => $person1->id,
+            'user_id' => $user1->id
+        ]);
+
+        // Personal 2
+        $user2 = User::create([
+            'name' => 'personal2',
+            'email' => 'personal2@personal.com',
+            'password' => Hash::make('123456')
+        ]);
+        $user2->assignRole('personal');
+
+        // Crear persona y profile para personal2
+        $person2 = Person::create([
+            'DNI' => '87654321',
+            'first_name' => 'María',
+            'last_name' => 'García'
+        ]);
+
+        Profile::create([
+            'person_id' => $person2->id,
+            'user_id' => $user2->id
+        ]);
     }
+
 }
