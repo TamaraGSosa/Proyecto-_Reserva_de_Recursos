@@ -1,20 +1,20 @@
 @extends('adminlte::page')
 
-@section('title', 'Dashboard')
+@section('title', 'Dashboard Personal')
 
 @section('content_header')
-    <h1>Dashboard de Recursos</h1>
+    <h1>Dashboard Personal de Recursos</h1>
 @stop
 
 @section('content')
 <div class="container-fluid">
-    {{-- Tarjetas de estadísticas generales --}}
+    {{-- Tarjetas de estadísticas personales --}}
     <div class="row mb-4">
         <div class="col-md-4">
             <div class="card bg-primary text-white">
                 <div class="card-body text-center">
-                    <h3 class="card-title">{{ $reservasDelDia }}</h3>
-                    <p class="card-text">Reservas del día</p>
+                    <h3 class="card-title">{{ $misReservasDelDia }}</h3>
+                    <p class="card-text">Mis reservas del día</p>
                     <i class="fas fa-calendar-day fa-2x"></i>
                     <br>
                     <button class="btn btn-light btn-sm mt-2" data-toggle="modal" data-target="#modalReservasDia">
@@ -26,8 +26,8 @@
         <div class="col-md-4">
             <div class="card bg-warning text-white">
                 <div class="card-body text-center">
-                    <h3 class="card-title">{{ $reservasNoEntregadas }}</h3>
-                    <p class="card-text">No entregadas</p>
+                    <h3 class="card-title">{{ $misReservasNoEntregadas }}</h3>
+                    <p class="card-text">Mis no entregadas</p>
                     <i class="fas fa-exclamation-triangle fa-2x"></i>
                     <br>
                     <button class="btn btn-light btn-sm mt-2" data-toggle="modal" data-target="#modalNoEntregadas">
@@ -51,97 +51,26 @@
         </div>
     </div>
 
-    {{-- Recursos por categoría --}}
-    <h4 class="mb-3">Estado de Recursos</h4>
-    <div class="row">
-        @foreach($categoriesWithResources as $category)
-        <div class="col-md-6 col-lg-4 mb-4">
-            <div class="card">
-                <div class="card-header bg-info text-white">
-                    <h5 class="card-title mb-0">
-                        <i class="fas fa-cubes"></i> {{ $category['name'] }}
-                    </h5>
-                    <small class="text-white-50">
-                        {{ $category['available_resources'] }}/{{ $category['total_resources'] }} disponibles
-                    </small>
-                </div>
-                <div class="card-body">
-                    @if($category['resources']->isEmpty())
-                        <p class="text-muted text-center">No hay recursos en esta categoría</p>
-                    @else
-                        @foreach($category['resources'] as $resource)
-                        <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
-                            <div>
-                                <strong>{{ $resource['name'] }}</strong>
-                                @if($resource['marca'])
-                                <br><small class="text-muted">{{ $resource['marca'] }}</small>
-                                @endif
-                            </div>
-                            <div class="text-right">
-                                @if($resource['is_reserved'])
-                                    <span class="badge badge-danger">
-                                        <i class="fas fa-lock"></i> Reservado
-                                    </span>
-                                    <br>
-                                    <small class="text-muted">
-                                        {{ \Carbon\Carbon::parse($resource['reservation']['start_time'])->format('H:i') }} -
-                                        {{ \Carbon\Carbon::parse($resource['reservation']['end_time'])->format('H:i') }}
-                                        <br>
-                                        <em>{{ Str::limit($resource['reservation']['person'], 15) }}</em>
-                                    </small>
-                                @else
-                                    <span class="badge badge-success">
-                                        <i class="fas fa-check-circle"></i> Disponible
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-                        @endforeach
-                    @endif
-                </div>
-                <div class="card-footer text-center">
-                    <small class="text-muted">
-                        Estado actual del día {{ \Carbon\Carbon::now()->format('d/m/Y') }}
-                    </small>
-                </div>
-            </div>
-        </div>
-        @endforeach
-    </div>
 
-    @if($categoriesWithResources->isEmpty())
-    <div class="row">
-        <div class="col-12">
-            <div class="alert alert-info text-center">
-                <h4><i class="fas fa-info-circle"></i> No hay categorías configuradas</h4>
-                <p>Configure categorías y recursos para ver el dashboard.</p>
-            </div>
-        </div>
-    </div>
-    @endif
-
-    {{-- Modal Reservas del Día --}}
+    {{-- Modal Mis Reservas del Día --}}
     <x-adminlte-modal id="modalReservasDia" size="lg" icon="fas fa-calendar-day" v-centered static-backdrop scrollable>
-        <h5>Reservas del Día ({{ \Carbon\Carbon::now()->format('d/m/Y') }})</h5>
-        @if($reservasDelDiaDetalles->isEmpty())
-            <p class="text-muted">No hay reservas programadas para hoy.</p>
+        <h5>Mis Reservas del Día ({{ \Carbon\Carbon::now()->format('d/m/Y') }})</h5>
+        @if($misReservasDelDiaDetalles->isEmpty())
+            <p class="text-muted">No tienes reservas programadas para hoy.</p>
         @else
             <div class="table-responsive">
                 <table class="table table-striped">
                     <thead>
                         <tr>
                             <th>Hora</th>
-                            <th>Persona</th>
                             <th>Recursos</th>
                             <th>Estado</th>
-                            <th>Creado por</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($reservasDelDiaDetalles as $reserva)
+                        @foreach($misReservasDelDiaDetalles as $reserva)
                         <tr>
                             <td>{{ \Carbon\Carbon::parse($reserva->start_time)->format('H:i') }} - {{ \Carbon\Carbon::parse($reserva->end_time)->format('H:i') }}</td>
-                            <td>{{ $reserva->profile->person->first_name }} {{ $reserva->profile->person->last_name }}</td>
                             <td>
                                 @foreach($reserva->resources as $resource)
                                 <span class="badge badge-secondary">{{ $resource->name }}</span>
@@ -152,7 +81,6 @@
                                     {{ $reserva->status->name }}
                                 </span>
                             </td>
-                            <td>{{ $reserva->creator ? $reserva->creator->name : 'N/A' }}</td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -164,11 +92,11 @@
         </x-slot>
     </x-adminlte-modal>
 
-    {{-- Modal No Entregadas --}}
+    {{-- Modal Mis No Entregadas --}}
     <x-adminlte-modal id="modalNoEntregadas" size="lg" icon="fas fa-exclamation-triangle" v-centered static-backdrop scrollable>
-        <h5>Reservas No Entregadas</h5>
-        @if($reservasNoEntregadasDetalles->isEmpty())
-            <p class="text-success">¡Excelente! Todas las reservas han sido entregadas correctamente.</p>
+        <h5>Mis Reservas No Entregadas</h5>
+        @if($misReservasNoEntregadasDetalles->isEmpty())
+            <p class="text-success">¡Excelente! Todas tus reservas han sido entregadas correctamente.</p>
         @else
             <div class="alert alert-warning">
                 <strong>Atención:</strong> Estas reservas deberían haber sido entregadas pero aún no lo han sido.
@@ -178,19 +106,17 @@
                     <thead>
                         <tr>
                             <th>Fecha/Hora</th>
-                            <th>Persona</th>
                             <th>Recursos</th>
                             <th>Estado</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach($reservasNoEntregadasDetalles as $reserva)
+                        @foreach($misReservasNoEntregadasDetalles as $reserva)
                         <tr>
                             <td>
                                 {{ \Carbon\Carbon::parse($reserva->start_time)->format('d/m H:i') }} -
                                 {{ \Carbon\Carbon::parse($reserva->end_time)->format('H:i') }}
                             </td>
-                            <td>{{ $reserva->profile->person->first_name }} {{ $reserva->profile->person->last_name }}</td>
                             <td>
                                 @foreach($reserva->resources as $resource)
                                 <span class="badge badge-secondary">{{ $resource->name }}</span>

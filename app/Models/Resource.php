@@ -19,4 +19,8 @@ class Resource extends Model
      public function status(){
         return $this->belongsTo(StatusResource::class,'status_resource_id');
     }
+     public function reservations()
+    {
+        return $this->belongsToMany(Reservation::class, 'reservation_resources', 'resource_id', 'reservation_id');
+    }
 }

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('marca')->nullable();
-            $table->string('description')->nullable();
+            $table->text('description')->nullable();
             $table->unsignedBigInteger('status_resource_id');
             $table->unsignedBigInteger('category_id');
             $table->timestamps();

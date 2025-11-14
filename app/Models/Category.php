@@ -13,12 +13,8 @@ class Category extends Model
         'name'
     ];
 
-    public function resource() {
+    public function resources() {
         return $this->hasMany(Resource::class,'category_id');
-        
-    }
-    public function category()
-    {
-        return $this->belongsTo(Category::class, 'category_id');
+
     }
 }

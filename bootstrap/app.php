@@ -14,11 +14,16 @@ use Illuminate\Routing\Router;
             ->group (base_path('routes/web.php'));
             $router -> middleware(['web' ,'auth'])
             ->prefix('panel')
-            ->group(base_path('routes/panel.php'));
+            ->group(function () {
+                require base_path('routes/panel.php');
+            });
         }
     )
     ->withMiddleware(function(Middleware $middleware):void {
-        //
+        $middleware->alias([
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+        ]);
     })
     ->withExceptions(function(Exceptions $exceptions):void {
 //
