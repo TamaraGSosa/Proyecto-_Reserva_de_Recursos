@@ -9,7 +9,7 @@ use App\Models\Resource;
 use App\Models\StatusReservation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Validator;
 class ReservationController extends Controller
 {
 
@@ -164,66 +164,114 @@ class ReservationController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
+public function store(Request $request)
+{
+    $user = Auth::user();
 
-        if (!Auth::check()) {
-            return redirect()->back()->withErrors(['auth' => 'Debes estar autenticado para crear una reserva.']);
-        }
-
-        // Validación base
-        $request->validate([
-            'start_time' => 'required|date',
-            'end_time' => 'required|date|after:start_time',
-            'resource_id' => 'required|array|min:1',
-            'resource_id.*' => 'exists:resources,id',
-        ]);
-
-        // Si es personal, usar su propio profile y estado Pendiente
-        if (Auth::user()->roles->contains('name', 'personal')) {
-            $profile = Auth::user()->profile;
-            if (!$profile) {
-                return redirect()->back()->withErrors(['profile' => 'No tienes un perfil configurado.']);
-            }
-            $statusId = 1; // Pendiente para personal
-        } else {
-            // Para administradores, validar persona y permitir elegir estado
-            $request->validate([
-                'dni' => 'required|string|max:20',
-                'first_name' => 'required|string|max:255',
-                'last_name' => 'required|string|max:255',
-                'status_id' => 'required|in:1,2', // Solo Pendiente o En curso
-            ]);
-
-            // 2️⃣ Persona
-            $person = Person::firstOrCreate(
-                ['DNI' => $request->dni],
-                ['first_name' => $request->first_name, 'last_name' => $request->last_name]
-            );
-
-            // 3️⃣ Profile
-            $profile = Profile::firstOrCreate(
-                ['person_id' => $person->id],
-                ['user_id' => Auth::id()]
-            );
-
-            $statusId = $request->status_id;
-        }
-
-        // 4️⃣ Reserva
-        $reservation = Reservation::create([
-            'profile_id' => $profile->id,
-            'status_reservation_id' => $statusId,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
-            'create_by_user_id' => Auth::id(),
-        ]);
-
-        // 5️⃣ Asignar recursos
-        $reservation->resources()->attach($request->resource_id);
-
-        return redirect()->route('reservations.index')->with('success', 'Reserva creada correctamente');
+    if (!$user) {
+        return redirect()->back()->withErrors(['auth' => 'Debes estar autenticado para crear una reserva.']);
     }
+
+    // --- 1️⃣ Validación base: fechas y recursos ---
+    $validator = Validator::make($request->all(), [
+        'start_time' => 'required|date|after_or_equal:today',
+        'end_time' => 'required|date|after:start_time',
+        'resource_id' => 'required|array|min:1',
+        'resource_id.*' => 'exists:resources,id',
+    ], [
+        'start_time.required' => 'Debes seleccionar una fecha de inicio.',
+        'start_time.after_or_equal' => 'La fecha de inicio no puede ser pasada.',
+        'end_time.required' => 'Debes seleccionar una fecha de fin.',
+        'end_time.after' => 'La fecha de fin debe ser posterior a la fecha de inicio.',
+        'resource_id.required' => 'Debes seleccionar al menos un recurso.',
+        'resource_id.*.exists' => 'Uno de los recursos seleccionados no existe.',
+    ]);
+
+    // --- 2️⃣ Validación de disponibilidad de recursos ---
+    $resourceIds = $request->resource_id ?? [];
+    if (count($resourceIds) > 0) {
+        $conflict = Reservation::whereHas('resources', function($q) use ($resourceIds) {
+            $q->whereIn('resources.id', $resourceIds);
+        })->where(function($q) use ($request) {
+            $q->whereBetween('start_time', [$request->start_time, $request->end_time])
+              ->orWhereBetween('end_time', [$request->start_time, $request->end_time]);
+        })->exists();
+
+        if ($conflict) {
+            $validator->errors()->add('resource_id', 'Uno o más recursos ya están reservados en este horario.');
+        }
+    }
+
+    // --- 3️⃣ Validación de administrador: DNI, Nombre y Apellido ---
+    if (!$user->roles->contains('name', 'personal')) {
+        $adminValidator = Validator::make($request->all(), [
+            'dni' => 'required|string|max:20',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'status_id' => 'required|in:1,2',
+        ], [
+            'dni.required' => 'El DNI es obligatorio.',
+            'first_name.required' => 'El nombre es obligatorio.',
+            'last_name.required' => 'El apellido es obligatorio.',
+            'status_id.required' => 'Debes seleccionar un estado.',
+        ]);
+
+        if ($adminValidator->fails()) {
+            foreach ($adminValidator->errors()->messages() as $key => $msgs) {
+                foreach ($msgs as $msg) {
+                    $validator->errors()->add($key, $msg);
+                }
+            }
+        }
+    }
+
+    // --- 4️⃣ Si hay errores, redirigir con todos ---
+    if ($validator->fails()) {
+        return redirect()->back()->withErrors($validator)->withInput();
+    }
+
+    // --- 5️⃣ Crear reserva ---
+    if ($user->roles->contains('name', 'personal')) {
+        $profile = $user->profile;
+        if (!$profile) {
+            return redirect()->back()->withErrors(['profile' => 'No tienes un perfil configurado.']);
+        }
+        $statusId = 1; // Pendiente para personal
+    } else {
+        // ✅ Aquí nos aseguramos de que dni, first_name y last_name existan
+        if (!$request->dni || !$request->first_name || !$request->last_name) {
+            return redirect()->back()->withErrors([
+                'dni' => 'El DNI, nombre y apellido son obligatorios para crear una reserva .'
+            ])->withInput();
+        }
+
+        $person = Person::firstOrCreate(
+            ['DNI' => $request->dni],
+            ['first_name' => $request->first_name, 'last_name' => $request->last_name]
+        );
+
+        $profile = Profile::firstOrCreate(
+            ['person_id' => $person->id],
+            ['user_id' => $user->id]
+        );
+
+        $statusId = $request->status_id;
+    }
+
+    // --- 6️⃣ Crear la reserva ---
+    $reservation = Reservation::create([
+        'profile_id' => $profile->id,
+        'status_reservation_id' => $statusId,
+        'start_time' => $request->start_time,
+        'end_time' => $request->end_time,
+        'create_by_user_id' => $user->id,
+    ]);
+
+    $reservation->resources()->attach($request->resource_id);
+
+    return redirect()->route('reservations.index')->with('success', 'Reserva creada correctamente');
+}
+
 
 
     /**
@@ -302,7 +350,7 @@ class ReservationController extends Controller
 
     public function actualizarEstados()
     {
-        $ahora = now();
+        $ahora = now()->setTimezone('America/Argentina/Buenos_Aires');
 
         // Solo marcar como "No entregado" reservas EN CURSO que pasaron su tiempo de finalización
         $reservasVencidas = Reservation::where('status_reservation_id', 2) // Solo En curso

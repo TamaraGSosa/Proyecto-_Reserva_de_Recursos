@@ -1,19 +1,10 @@
 $(function () {
+  $('#filtro-date').datetimepicker({
+        locale: 'es',        // español
+        format: 'DD/MM/YYYY', // opcional, igual que tu config de Blade
+    });
 
-   let hoy = new Date();
-let dia = String(hoy.getDate()).padStart(2, '0');
-let mes = String(hoy.getMonth() + 1).padStart(2, '0'); // Los meses empiezan en 0
-let anio = hoy.getFullYear();
-
-// Formato YYYY-MM-DD para input type="date"
-let fechaHoy = `${anio}-${mes}-${dia}`;
-
-$('#filtro-date').val(fechaHoy);
-
-
-    // --- Rol por defecto ---
-    $('#filtro-createby').val('administrador');
-
+    // --- Inicializar DataTable ---
     let tabla = $("#tabla-reservas").DataTable({
         responsive: true,
         autoWidth: false,
@@ -34,48 +25,40 @@ $('#filtro-date').val(fechaHoy);
                 sPrevious: "Anterior",
             },
         },
-        dom: "lrtip", // Oculta el buscador global
+        dom: "lrtip",
     });
 
+    // --- Fecha inicial (hoy) ---
+    let hoy = moment().format('DD/MM/YYYY'); // usa moment.js que trae AdminLTE
+    $('#filtro-date').val(hoy); // setea input
+    filtrarFecha(hoy);
 
-
-    // Filtro por nombre (columna 1)
-    $("#filtro-profile").on("keyup", function () {
-        tabla.column(1).search(this.value).draw();
-    });
-
-    // Filtro por creador/rol (columna 2)
-    $("#filtro-createby").on("change", function () {
-        tabla.column(2).search(this.value).draw();
-    });
-
-    // Filtro por estado
-    $("#filtro-status").on("change", function () {
-        var estado = $(this).val(); // valor seleccionado
-        tabla
-            .column(4) // columna “Estado” (0-based)
-            .search(estado ? "^" + estado + "$" : "", true, false)
-            .draw();
-    });
-
- $("#filtro-date").on("change", function () {
+    // --- Eventos filtros ---
+    $('#filtro-date').on('change.datetimepicker', function(e){
         filtrarFecha($(this).val());
     });
 
-    // --- Filtrado inicial por fecha hoy ---
-    filtrarFecha(fechaHoy);
+    $('#filtro-profile').on("keyup", function () {
+        tabla.column(1).search(this.value).draw();
+    });
 
-    // --- Función para filtrar fecha ---
+    $('#filtro-createby').on("change", function () {
+        tabla.column(2).search(this.value).draw();
+    });
+
+    $('#filtro-status').on("change", function () {
+        var estado = $(this).val();
+        tabla.column(4).search(estado ? "^" + estado + "$" : "", true, false).draw();
+    });
+
+    // --- Función filtrar fecha ---
     function filtrarFecha(fecha) {
-        if (!fecha) {
+        if(!fecha){
             tabla.column(5).search('').draw();
             return;
         }
-        let parts = fecha.split('-'); // YYYY-MM-DD
-        let fechaFormateada = parts[2] + '/' + parts[1] + '/' + parts[0]; // dd/mm/yyyy
-        tabla.column(5).search(fechaFormateada, true, false).draw();
+
+        // La fecha ya viene en DD/MM/YYYY
+        tabla.column(5).search(fecha, true, false).draw();
     }
-
-
-
 });
