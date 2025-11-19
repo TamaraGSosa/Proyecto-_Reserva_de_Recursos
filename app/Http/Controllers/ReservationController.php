@@ -322,6 +322,4 @@ class ReservationController extends Controller
 
         return redirect()->back()->with('success', $message);
     }
-
-
 }
