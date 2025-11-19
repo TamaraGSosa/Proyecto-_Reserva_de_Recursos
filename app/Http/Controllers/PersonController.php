@@ -7,25 +7,25 @@ use Illuminate\Http\Request;
 
 class PersonController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    
+   public function index()
     {
-        //
+        $people = Person::all();
+        return view('usuarios.index', compact('people'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('usuarios.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    public function edit(Person $person)
+    {
+        return view('usuarios.edit', compact('person'));
+    }
+
+    
+
     public function store(Request $request)
     {
         //
@@ -39,13 +39,6 @@ class PersonController extends Controller
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Person $person)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
