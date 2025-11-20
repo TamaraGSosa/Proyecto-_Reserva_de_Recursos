@@ -25,3 +25,9 @@ Route::resource('resources', ResourceController::class);
 
 // Reservaciones (solo una línea)
 Route::resource('reservations', ReservationController::class);
+
+
+Route::resource('usuarios', UserController::class);
+Route::get('/personas/{dni}', function ($dni) {
+    return Person::where('dni', $dni)->with('user')->first();
+});
