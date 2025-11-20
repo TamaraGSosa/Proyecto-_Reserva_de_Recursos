@@ -301,6 +301,8 @@ return [
     */
 
     'menu' => [
+    
+
         // // Navbar items:
         // [
         //     'type' => 'navbar-search',
@@ -313,32 +315,32 @@ return [
         // ],
 
         // Sidebar items:
-        
-     
+
+
         [
             'text' => 'Gestión de Recursos',
             'route' => 'resources.index',
-            'icon'=>'fas fa-boxes',
+            'icon' => 'fas fa-boxes',
             'can' => 'gestionar_recursos',
         ],
         [
             'text' => 'Gestión de Reservas',
             'route' => 'reservations.index',
-            'icon'=>'fas fa-calendar-check',
+            'icon' => 'fas fa-calendar-check',
             'can' => 'gestionar_reservas',
         ],
         [
             'text' => 'Gestión de Usuarios',
-            'url' => '#',
+            'route' => 'usuarios.index',
             'icon'=>'fas fa-users',
             'can' => 'gestionar_usuarios',
         ],
-        
-        
 
-      
-       
-      
+
+
+
+
+
     ],
 
     /*
@@ -376,6 +378,31 @@ return [
     */
 
     'plugins' => [
+         'TempusDominusBs4' => [
+        'active' => true,
+        'files' => [
+            [
+                'type' => 'js',
+                'asset' => false,
+                'location' => '//cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js',
+            ],
+            [
+                'type' => 'js',
+                'asset' => false,
+                'location' => '//cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/locale/es.min.js',
+            ],
+            [
+                'type' => 'js',
+                'asset' => false,
+                'location' => '//cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/js/tempusdominus-bootstrap-4.min.js',
+            ],
+            [
+                'type' => 'css',
+                'asset' => false,
+                'location' => '//cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.39.0/css/tempusdominus-bootstrap-4.min.css',
+            ],
+        ],
+    ],
         'Datatables' => [
             'active' => true,
             'files' => [
@@ -397,20 +424,20 @@ return [
             ],
         ],
         'DataTablesResponsive' => [
-                'active' => true,
-                'files' => [
-                    [
-                        'type' => 'js',
-                        'asset' => false,
-                        'location' => '//cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js',
-                    ],
-                    [
-                        'type' => 'css',
-                        'asset' => false,
-                        'location' => '//cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap4.min.css',
-                    ],
+            'active' => true,
+            'files' => [
+                [
+                    'type' => 'js',
+                    'asset' => false,
+                    'location' => '//cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js',
+                ],
+                [
+                    'type' => 'css',
+                    'asset' => false,
+                    'location' => '//cdn.datatables.net/responsive/2.2.9/css/responsive.bootstrap4.min.css',
                 ],
             ],
+        ],
         'Select2' => [
             'active' => false,
             'files' => [

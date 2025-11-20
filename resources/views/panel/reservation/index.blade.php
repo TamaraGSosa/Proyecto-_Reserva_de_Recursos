@@ -4,6 +4,13 @@
 
 @section('plugins.Datatables', true)
 @section('plugins.DataTablesResponsive', true)
+@section('plugins.TempusDominusBs4', true)
+
+@php
+$config = ['format' => 'DD/MM/YYYY',
+"locale" => "es",];
+@endphp
+
 
 @section('content_header')
 @stop
@@ -12,23 +19,22 @@
 <div class="container-fluid">
 
     {{-- Botón Nueva Reserva --}}
-    <div class="row mb-3">
-        <div class="col-12 d-flex justify-content-between align-items-center mt-4">
-            <h2 class="m-0 h5 h-md2">Nueva Reserva</h2>
-            <button id="btnNuevaReserva" class="btn btn-primary" data-toggle="modal" data-target="#modalNuevaReserva">
-                <i class="fas fa-plus"></i> Crear
+    <div class="row mb-3 align-items-center py-4 ">
+        <div class="col d-flex justify-content-start">
+            <button id="btnNuevaReserva" class="btn btn-primary " data-toggle="modal" data-target="#modalNuevaReserva">
+                <i class="fas fa-plus"></i> Crear Reserva
             </button>
         </div>
+        <div class="col d-flex justify-content-end">
+            <form method="POST" action="{{ route('reservations.update') }}" style="display: inline;">
+                @csrf
+                <button id="btnActualizarEstados" type="submit" class="btn btn-secondary" title="Actualizar estados">
+                    <i class="fas fa-sync-alt"></i> Actualizar Estados
+                </button>
+            </form>
+        </div>
     </div>
-    <div class="d-flex justify-content-end mb-4">
-        <form method="POST" action="{{ route('reservations.update') }}" style="display: inline;">
-            @csrf
-            <button id="btnActualizarEstados" type="submit" class="btn btn-secondary" title="Actualizar estados">
-                <i class="fas fa-sync-alt"></i>
-            </button>
-        </form>
 
-    </div>
 
     {{-- Alertas de sesión --}}
     @if(session('success'))
@@ -91,17 +97,23 @@
 
     {{-- FILTROS --}}
     <div class="row mb-3">
+
         <div class="col-12 col-md-3 mb-2">
+            <label for="filtro-profile">Nombre</label>
             <input type="text" id="filtro-profile" class="form-control" placeholder="Buscar por nombre">
         </div>
+
         <div class="col-12 col-md-3 mb-2">
+            <label for="filtro-createby">Rol</label>
             <select id="filtro-createby" class="form-control">
                 <option value="">Todos los roles</option>
                 <option value="administrador">Administrador</option>
-                <option value="personal">personal</option>
+                <option value="personal">Personal</option>
             </select>
         </div>
+
         <div class="col-12 col-md-3 mb-2">
+            <label for="filtro-status">Estado</label>
             <select id="filtro-status" class="form-control">
                 <option value="">Todos los estados</option>
                 @foreach ($status_reservations as $est)
@@ -109,13 +121,17 @@
                 @endforeach
             </select>
         </div>
+
         <div class="col-12 col-md-3 mb-2">
-            <x-adminlte-input id="filtro-date" class="from-control" type="date" name="filtro-date" placeholder="Fecha final" required />
+            <x-adminlte-input-date
+                id="filtro-date"
+                name="filtro-date"
+                :config="$config"
+                label="Fecha" />
         </div>
 
-
-
     </div>
+
 
     {{-- Tabla de reservas --}}
     <div class="row">
@@ -235,82 +251,95 @@
     </div>
 
     {{-- Modal Crear/Editar Reserva --}}
-    <x-adminlte-modal id="modalNuevaReserva" size="lg" icon="fas fa-plus" v-centered static-backdrop scrollable>
-        @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                <li>{{ $error }}</li>
-                @endforeach
-            </ul>
+    <div class="modal fade" id="modalNuevaReserva" tabindex="-1" role="dialog" aria-labelledby="modalNuevaReservaLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalNuevaReservaLabel">Nueva Reserva</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Cerrar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <form id="formReserva" method="POST" action="{{ route('reservations.store') }}" class="p-3">
+                    @csrf
+                    <input type="hidden" name="_method" id="metodoReserva" value="POST">
+                    <input type="hidden" name="reservation_id" id="reservation_id" value="">
+                    <input type="hidden" name="profile_id" id="profile_id" value="">
+
+                    {{-- Primera fila: Fechas --}}
+                    <div class="form-row">
+                        <div class="form-group col-md-6">
+                            <label for="start_time">Hora de inicio</label>
+                            <input type="datetime-local" class="form-control" name="start_time" id="start_time" value="{{ old('start_time') }}" min="{{ date('Y-m-d') }}T00:00">
+                            <span class="text-danger" id="error-start_time">{{ $errors->first('start_time') }}</span>
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label for="end_time">Hora final</label>
+                            <input type="datetime-local" class="form-control" name="end_time" id="end_time" value="{{ old('end_time') }}" min="{{ date('Y-m-d') }}T00:00">
+                            <span class="text-danger" id="error-end_time">{{ $errors->first('end_time') }}</span>
+                        </div>
+                    </div>
+
+                    {{-- Segunda fila: Recurso y Estado --}}
+                    <div class="form-row">
+                        <div class="form-group col-md-8">
+                            <label for="resource_search">Buscar Recurso</label>
+                            <div class="input-group">
+                                <input list="resources_list" id="resource_search" class="form-control" placeholder="Buscar recurso...">
+                                <datalist id="resources_list"></datalist>
+                                <div class="input-group-append">
+                                    <button type="button" id="btnAddResource" class="btn btn-secondary">Agregar</button>
+                                </div>
+                            </div>
+                            <span class="text-danger" id="error-resource_id">{{ $errors->first('resource_id') }}</span>
+                            <div id="selectedResources" class="mt-2"></div>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="status_id">Estado inicial</label>
+                            <select name="status_id" id="status_id" class="form-control" required>
+                                <option value="2" {{ old('status_id') == '2' ? 'selected' : '' }}>En curso</option>
+                                <option value="1" {{ old('status_id') == '1' ? 'selected' : '' }}>Pendiente</option>
+                            </select>
+                            <span class="text-danger" id="error-status_id">{{ $errors->first('status_id') }}</span>
+                        </div>
+                    </div>
+
+                    {{-- Tercera fila: DNI, Nombre y Apellido --}}
+                    <div class="form-row">
+                        <div class="form-group col-md-4">
+                            <label for="dni">DNI</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="dni" id="dni" placeholder="Ingrese DNI" value="{{ old('dni') }}">
+                                <div class="input-group-append">
+                                    <button type="button" id="btnVerificarDNI" class="btn btn-success">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <span class="text-danger" id="error-dni">{{ $errors->first('dni') }}</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="first_name">Nombre</label>
+                            <input type="text" class="form-control" name="first_name" id="first_name" placeholder="Nombre" readonly value="{{ old('first_name') }}">
+                            <span class="text-danger" id="error-first_name">{{ $errors->first('first_name') }}</span>
+                        </div>
+                        <div class="form-group col-md-4">
+                            <label for="last_name">Apellido</label>
+                            <input type="text" class="form-control" name="last_name" id="last_name" placeholder="Apellido" readonly value="{{ old('last_name') }}">
+                            <span class="text-danger" id="error-last_name">{{ $errors->first('last_name') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-3">
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+
+            </div>
         </div>
-        @endif
-
-        <form id="formReserva" method="POST" action="{{ route('reservations.store') }}">
-            @csrf
-            <input type="hidden" name="_method" id="metodoReserva" value="POST">
-            <input type="hidden" name="reservation_id" id="reservation_id" value="">
-            <input type="hidden" name="profile_id" id="profile_id" value="">
-
-            {{-- Primera fila: Fechas --}}
-            <div class="row">
-                <div class="col-md-6 col-12 mb-2">
-                    <x-adminlte-input type="datetime-local" name="start_time" id="start_time" label="Hora de inicio" required />
-                </div>
-                <div class="col-md-6 col-12 mb-2">
-                    <x-adminlte-input type="datetime-local" name="end_time" id="end_time" label="Hora final" required />
-                </div>
-            </div>
-
-            {{-- Segunda fila: Buscador de recursos y estado --}}
-            <div class="row">
-                <div class="col-md-8 col-12 mb-2">
-                    <label for="resource_search">Buscar Recurso</label>
-                    <div class="input-group">
-                        <input list="resources_list" id="resource_search" class="form-control" placeholder="Buscar recurso...">
-                        <datalist id="resources_list"></datalist>
-                        <div class="input-group-append">
-                            <button type="button" id="btnAddResource" class="btn btn-secondary">Agregar</button>
-                        </div>
-                    </div>
-                    <div id="selectedResources" class="mt-2"></div>
-                </div>
-                <div class="col-md-4 col-12 mb-2">
-                    <label for="status_id">Estado inicial</label>
-                    <select name="status_id" id="status_id" class="form-control" required>
-                        <option value="2" selected>En curso</option>
-                        <option value="1">Pendiente</option>
-                    </select>
-                </div>
-            </div>
-
-            {{-- Tercera fila: DNI, Nombre y Apellido --}}
-            <div class="row">
-                <div class="col-md-4 col-12 mb-2">
-                    <label for="dni">DNI</label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" name="dni" id="dni" placeholder="Ingrese DNI" required>
-                        <div class="input-group-append">
-                            <button type="button" id="btnVerificarDNI" class="btn btn-success">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4 col-12 mb-2">
-                    <x-adminlte-input name="first_name" id="first_name" label="Nombre" placeholder="Nombre" required readonly />
-                </div>
-                <div class="col-md-4 col-12 mb-2">
-                    <x-adminlte-input name="last_name" id="last_name" label="Apellido" placeholder="Apellido" required readonly />
-                </div>
-            </div>
-
-            <div class="d-flex justify-content-end mt-3">
-                <button type="submit" class="btn btn-primary">Guardar</button>
-            </div>
-        </form>
-        <x-slot name="footerSlot"> </x-slot>
-    </x-adminlte-modal>
+    </div>
 
     {{-- Modal Ver Detalles Reserva --}}
     <x-adminlte-modal id="modalVerReserva" size="lg" icon="fas fa-eye" v-centered static-backdrop>
@@ -335,28 +364,62 @@
 @stop
 
 @section('js')
+@if ($errors->any())
 <script>
+    window.modalHasErrors = true;
+    $('#modalNuevaReserva').modal('show');
+</script>
+@endif
+<script>
+    // --- Variables y funciones de recursos ---
+    let selectedResources = [];
+
+    function updateSelectedResources() {
+        const container = $('#selectedResources');
+        container.empty();
+        selectedResources.forEach((r, i) => {
+            container.append(`
+            <div class="badge badge-secondary mr-2 mb-2" style="display: inline-block;">
+                ${r.name}
+                <button type="button" class="btn btn-sm btn-danger ml-1" onclick="removeResource(${i})">×</button>
+            </div>
+        `);
+        });
+        // inputs ocultos
+        $('#selectedResources').nextAll('input[name="resource_id[]"]').remove();
+        selectedResources.forEach(r => {
+            $('#selectedResources').after(`<input type="hidden" name="resource_id[]" value="${r.id}">`);
+        });
+    }
+
     $(document).ready(function() {
 
-        // --- Variables y funciones de recursos ---
-        let selectedResources = [];
+        // Reset modal
+        function resetModal() {
+            window.modalHasErrors = false;
+            $('#formReserva')[0].reset();
+            $('#formReserva .is-invalid').removeClass('is-invalid');
+            $('#formReserva .text-danger').text('');
+            $('#modalNuevaReserva .modal-title').text('Nueva Reserva');
+            $('#formReserva').attr('action', '{{ route("reservations.store") }}');
+            $('#metodoReserva').val('POST');
+            $('#reservation_id,#profile_id').val('');
 
-        function updateSelectedResources() {
-            const container = $('#selectedResources');
-            container.empty();
-            selectedResources.forEach((r, i) => {
-                container.append(`
-                <div class="badge badge-secondary mr-2 mb-2" style="display: inline-block;">
-                    ${r.name}
-                    <button type="button" class="btn btn-sm btn-danger ml-1" onclick="removeResource(${i})">×</button>
-                </div>
-            `);
-            });
-            // inputs ocultos
-            $('#selectedResources').nextAll('input[name="resource_id[]"]').remove();
-            selectedResources.forEach(r => {
-                $('#selectedResources').after(`<input type="hidden" name="resource_id[]" value="${r.id}">`);
-            });
+            $('#status_id').val('2');
+
+            $('#first_name,#last_name').prop('readonly', true);
+            $('#dni').prop('readonly', false).removeClass('bg-light');
+
+            $('#btnVerificarDNI')
+                .prop('disabled', true)
+                .removeClass()
+                .addClass('btn btn-success')
+                .html('<i class="fas fa-search"></i>');
+
+            selectedResources = [];
+            updateSelectedResources();
+
+            personaEncontrada = false;
         }
 
         window.removeResource = function(index) {
@@ -384,12 +447,23 @@
                 data.forEach(resource => {
                     datalist.append(`<option value="${resource.name}" data-id="${resource.id}"></option>`);
                 });
+
+                // Limpiar recursos seleccionados al cambiar fechas solo si no hay errores y no hay recursos seleccionados
+                if (!window.modalHasErrors && selectedResources.length === 0) {
+                    selectedResources = [];
+                    updateSelectedResources();
+                }
             }).fail(() => alert('Error al cargar recursos disponibles.'));
         }
 
 
         // --- Eventos ---
-        $('#start_time,#end_time').on('change', loadAvailableResources);
+        $('#start_time,#end_time').on('input change', loadAvailableResources);
+
+        // Si hay errores, cargar recursos disponibles si hay fechas
+        if (window.modalHasErrors && $('#start_time').val() && $('#end_time').val()) {
+            loadAvailableResources();
+        }
 
         $('#btnAddResource').click(function() {
             const val = $('#resource_search').val().trim();
@@ -410,17 +484,8 @@
 
         // --- Modal Nueva Reserva ---
         $('#btnNuevaReserva').click(function() {
-            $('#modalNuevaReserva .modal-title').text('Nueva Reserva');
-            $('#formReserva').attr('action', '{{ route("reservations.store") }}');
-            $('#metodoReserva').val('POST');
-            $('#reservation_id,#profile_id').val('');
-            $('#formReserva')[0].reset();
-            // Resetear estado a "En curso" por defecto
-            $('#status_id').val('2');
-            $('#first_name,#last_name').prop('readonly', true);
-            $('#btnVerificarDNI').prop('disabled', true).removeClass().addClass('btn btn-success').html('<i class="fas fa-search"></i>');
-            selectedResources = [];
-            updateSelectedResources();
+            resetModal();
+            $('#modalNuevaReserva').modal('show');
         });
 
 
@@ -512,6 +577,8 @@
         $('.btnEditarReserva').click(function() {
             let reservationId = $(this).data('id');
 
+            resetModal();
+
             // Cambiar título del modal y acción del formulario
             $('#modalNuevaReserva .modal-title').text('Editar Reserva');
             $('#formReserva').attr('action', '/panel/reservations/' + reservationId);
@@ -528,7 +595,10 @@
                 $('#profile_id').val(data.profile_id);
 
                 // Cargar recursos seleccionados
-                selectedResources = data.resources.map(r => ({ id: r.id, name: r.name }));
+                selectedResources = data.resources.map(r => ({
+                    id: r.id,
+                    name: r.name
+                }));
                 updateSelectedResources();
 
                 // Cargar recursos disponibles (solo los no ocupados por otras reservas)
@@ -566,8 +636,7 @@
             $btn.prop('disabled', !$dni.val().trim());
         });
         $btn.on('click', () => {
-            if (personaEncontrada) return resetFormulario();
-            buscarPersona();
+            resetFormulario(); // Limpiar todo
         });
         $dni.on('blur', () => {
             if (!personaEncontrada && $dni.val().trim()) buscarPersona();
@@ -598,20 +667,44 @@
 
         // --- Reset modal al cerrarlo ---
         $('#modalNuevaReserva').on('hidden.bs.modal', function() {
-            $('#modalNuevaReserva .modal-title').text('Nueva Reserva');
-            $('#formReserva').attr('action', '{{ route("reservations.store") }}');
-            $('#metodoReserva').val('POST');
-            $('#reservation_id,#profile_id').val('');
-            $('#formReserva')[0].reset();
-            // Resetear estado a "En curso" por defecto
-            $('#status_id').val('2');
-            $('#first_name,#last_name').prop('readonly', true);
-            $('#btnVerificarDNI').prop('disabled', true).removeClass().addClass('btn btn-success').html('<i class="fas fa-search"></i>');
-            selectedResources = [];
-            updateSelectedResources();
+            if (window.modalHasErrors) {
+                console.log("No se resetea porque hay errores del backend.");
+                return;
+            }
+            resetModal();
         });
 
     });
 </script>
+@if ($errors->any())
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Reconstruir recursos seleccionados
+        const oldResources = @json(old('resource_id', []));
+        console.log('oldResources:', oldResources);
+        if (oldResources.length > 0) {
+            // Obtener nombres de recursos
+            $.get('{{ route("resources.available") }}', {
+                start_time: '2000-01-01T00:00',
+                end_time: '2000-01-01T00:01'
+            }, function(data) {
+                console.log('data recursos:', data);
+                selectedResources = oldResources.map(id => {
+                    const res = data.find(r => r.id == id);
+                    return res ? {
+                        id: res.id,
+                        name: res.name
+                    } : {
+                        id: id,
+                        name: 'Desconocido'
+                    };
+                });
+                console.log('selectedResources reconstruidos:', selectedResources);
+                updateSelectedResources();
+            });
+        }
+    });
+</script>
+@endif
 <script src="{{ asset('js/datatablereservations.js') }}"></script>
 @stop

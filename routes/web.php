@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+<<<<<<< HEAD
 use App\Http\Controllers\PdfController;
 
 
@@ -16,6 +17,9 @@ Route::get('/reporte/form-recursos', function () {
     return view('reportes.form_recursos');
 })->name('reporte.form_recursos');
 Route::get('/reporte/pdf/recursos', [PdfController::class, 'exportarRecursos'])->name('reporte.recursos.generar');
+=======
+use App\Http\Controllers\UserController;
+>>>>>>> 7d7086961ccb0d6cc3a0019247abee02ec7b9523
 
 // Redirigir la raíz al login
 Route::get('/', function () {
@@ -28,3 +32,6 @@ Auth::routes();
 Route::get('/home', function () {
     return redirect('/login');
 });
+
+Route::resource('usuarios', UserController::class)->middleware('auth');
+Route::get('/personas/{dni}', [App\Http\Controllers\PersonController::class, 'search']);

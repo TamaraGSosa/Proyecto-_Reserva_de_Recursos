@@ -19,5 +19,8 @@ class StatusResourceSeeder extends Seeder
         StatusResource::create([
             'name' => 'No disponible'
         ]);
+        StatusResource::create([
+            'name' => 'Eliminado'
+        ]);
     }
 }
