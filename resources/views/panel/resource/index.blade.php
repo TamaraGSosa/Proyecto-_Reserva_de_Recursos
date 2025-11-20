@@ -37,6 +37,27 @@
     </div>
     @endif
 
+
+    {{-- Formulario para Reporte PDF --}}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Reporte Diario de Recursos Reservados</h3>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('reporte.recursos.pdf.dia') }}" method="GET" target="_blank" class="form-inline">
+                        <div class="form-group mb-2">
+                            <label for="fecha_recursos" class="sr-only">Fecha</label>
+                            <input type="date" class="form-control" id="fecha_recursos" name="fecha" value="{{ date('Y-m-d') }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary mb-2 ml-2">Generar PDF</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- FILTROS --}}
     <div class="row mb-3">
         <div class="col-12 col-md-3 mb-2">

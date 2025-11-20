@@ -16,21 +16,41 @@ class ReservationController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         $resources = Resource::all();
         $status_reservations = StatusReservation::all();
 
-        if (Auth::user()->roles->contains('name', 'personal')) {
-            $reservations = Reservation::with(['profile.person', 'resources', 'status'])
-                ->where('create_by_user_id', Auth::id())
-                ->orderBy('created_at', 'desc')
-                ->get();
+        $query = Reservation::with(['profile.person', 'resources', 'status']);
 
+        // Aplicar filtros de fecha
+        $filterType = $request->input('filter_type', 'day');
+        $filterFecha = $request->input('filter_fecha');
+        $filterStartDate = $request->input('filter_start_date');
+        $filterEndDate = $request->input('filter_end_date');
+
+        if ($filterType === 'day' && $filterFecha) {
+            $query->whereDate('start_time', '=', $filterFecha);
+        } elseif ($filterType === 'range' && $filterStartDate && $filterEndDate) {
+            $startDate = \Carbon\Carbon::parse($filterStartDate)->startOfDay();
+            $endDate = \Carbon\Carbon::parse($filterEndDate)->endOfDay();
+
+            $query->where(function ($q) use ($startDate, $endDate) {
+                $q->whereBetween('start_time', [$startDate, $endDate])
+                  ->orWhereBetween('end_time', [$startDate, $endDate])
+                  ->orWhere(function ($subQuery) use ($startDate, $endDate) {
+                      $subQuery->where('start_time', '<', $startDate)
+                               ->where('end_time', '>', $endDate);
+                  });
+            });
+        }
+
+        if (Auth::user()->roles->contains('name', 'personal')) {
+            $query->where('create_by_user_id', Auth::id());
+            $reservations = $query->orderBy('created_at', 'desc')->get();
             return view('panel.reservation.personal', compact('reservations', 'status_reservations', 'resources'));
         } else {
-            $reservations = Reservation::with(['profile.person', 'creator.roles', 'resources', 'status'])->get();
-
+            $reservations = $query->orderBy('created_at', 'desc')->get();
             return view('panel.reservation.index', compact('reservations', 'status_reservations', 'resources'));
         }
     }

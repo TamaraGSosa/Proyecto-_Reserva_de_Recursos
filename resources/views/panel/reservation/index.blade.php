@@ -44,6 +44,51 @@
     </div>
     @endif
 
+
+    {{-- Formulario para Reporte PDF --}}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Reporte Diario de Reservas</h3>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('reporte.diario.pdf') }}" method="GET" target="_blank" class="form-inline">
+                        <div class="form-group mb-2">
+                            <label for="fecha_reservas" class="sr-only">Fecha</label>
+                            <input type="date" class="form-control" id="fecha_reservas" name="fecha" value="{{ date('Y-m-d') }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary mb-2 ml-2">Generar PDF</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Formulario para Reporte PDF por Rango de Fechas --}}
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Reporte de Reservas por Rango de Fechas</h3>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('reporte.pdf.rango') }}" method="GET" target="_blank" class="form-inline">
+                        <div class="form-group mb-2">
+                            <label for="start_date" class="sr-only">Fecha Inicio</label>
+                            <input type="date" class="form-control" id="start_date" name="start_date" value="{{ date('Y-m-d') }}">
+                        </div>
+                        <div class="form-group mb-2 ml-2">
+                            <label for="end_date" class="sr-only">Fecha Fin</label>
+                            <input type="date" class="form-control" id="end_date" name="end_date" value="{{ date('Y-m-d') }}">
+                        </div>
+                        <button type="submit" class="btn btn-primary mb-2 ml-2">Generar PDF por Rango</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- FILTROS --}}
     <div class="row mb-3">
         <div class="col-12 col-md-3 mb-2">
