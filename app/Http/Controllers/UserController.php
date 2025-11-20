@@ -37,6 +37,7 @@ class UserController extends Controller
             'apellido' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
+            'role' => 'required|string|in:administrador,personal',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -57,12 +58,14 @@ class UserController extends Controller
                 ]);
             }
 
-            User::create([
+            $user = User::create([
                 'name' => $request->nombre . ' ' . $request->apellido,
                 'email' => $request->email,
                 'password' => bcrypt($request->password),
                 'person_id' => $person->id,
             ]);
+
+            $user->assignRole($request->role);
         });
 
         return redirect()->route('usuarios.index')->with('success', 'Usuario creado correctamente.');

@@ -63,6 +63,15 @@
                 <input type="password" name="password_confirmation" class="form-control" required>
             </div>
 
+            <div class="form-group">
+                <label for="role">Rol</label>
+                <select name="role" id="role" class="form-control" required>
+                    <option value="" disabled selected>Seleccione un rol</option>
+                    <option value="administrador">Administrador</option>
+                    <option value="personal">Personal</option>
+                </select>
+            </div>
+
             <button type="submit" class="btn btn-success" id="guardarBtn">Guardar</button>
             <a href="{{ route('usuarios.index') }}" class="btn btn-secondary">Cancelar</a>
         </form>
