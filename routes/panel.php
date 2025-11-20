@@ -4,6 +4,7 @@ use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ReservationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ResourceController;
+use App\Http\Controllers\UserController;
 use App\Models\Person;
 
 // Dashboard

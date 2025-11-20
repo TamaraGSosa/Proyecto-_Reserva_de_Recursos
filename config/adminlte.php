@@ -301,6 +301,8 @@ return [
     */
 
     'menu' => [
+    
+
         // // Navbar items:
         // [
         //     'type' => 'navbar-search',
@@ -329,8 +331,8 @@ return [
         ],
         [
             'text' => 'Gestión de Usuarios',
-            'url' => '#',
-            'icon' => 'fas fa-users',
+            'route' => 'usuarios.index',
+            'icon'=>'fas fa-users',
             'can' => 'gestionar_usuarios',
         ],
 
