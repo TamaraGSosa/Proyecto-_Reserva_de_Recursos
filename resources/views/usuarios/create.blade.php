@@ -19,6 +19,7 @@
 
 <div class="card">
     <div class="card-body">
+        <div id="dniAlert" class="alert alert-danger d-none"></div>
         <form action="{{ route('usuarios.store') }}" method="POST">
             @csrf
 
@@ -74,35 +75,53 @@
 document.addEventListener('DOMContentLoaded', function () {
     const guardarBtn = document.getElementById('guardarBtn');
 
+    const dniInput = document.getElementById('dni');
+    const nombreInput = document.getElementById('nombre');
+    const apellidoInput = document.getElementById('apellido');
+    const emailInput = document.getElementById('email');
+    const alertBox = document.getElementById('dniAlert');
+
+    // Limpiar campos y alertas al escribir un nuevo DNI
+    dniInput.addEventListener('input', function() {
+        alertBox.classList.add('d-none');
+        nombreInput.value = '';
+        apellidoInput.value = '';
+        emailInput.value = '';
+        nombreInput.readOnly = false;
+        apellidoInput.readOnly = false;
+        guardarBtn.disabled = false;
+    });
+
     document.getElementById('buscarDni').addEventListener('click', function () {
-        const dni = document.getElementById('dni').value;
+        alertBox.classList.add('d-none');
+        const dni = dniInput.value;
         fetch(`/personas/${dni}`)
             .then(response => response.json())
             .then(data => {
                 if (data) {
-                    document.getElementById('nombre').value = data.first_name;
-                    document.getElementById('apellido').value = data.last_name;
+                    nombreInput.value = data.first_name;
+                    apellidoInput.value = data.last_name;
 
-                    document.getElementById('nombre').readOnly = true;
-                    document.getElementById('apellido').readOnly = true;
+                    nombreInput.readOnly = true;
+                    apellidoInput.readOnly = true;
 
                     if (data.user) {
-                        document.getElementById('email').value = data.user.email;
-                        alert('Esta persona ya tiene un usuario registrado.');
+                        emailInput.value = data.user.email;
+                        alertBox.textContent = 'Esta persona ya tiene un usuario registrado.';
+                        alertBox.classList.remove('d-none');
                         guardarBtn.disabled = true; // Deshabilitar botón
                     } else {
-                        document.getElementById('email').value = '';
+                        emailInput.value = '';
                         guardarBtn.disabled = false; // Habilitar botón
                     }
                 } else {
-                    document.getElementById('nombre').value = '';
-                    document.getElementById('apellido').value = '';
-                    document.getElementById('email').value = '';
+                    // Si no se encuentra, permitimos cargar manualmente sin alerta intrusiva
+                    nombreInput.value = '';
+                    apellidoInput.value = '';
+                    emailInput.value = '';
 
-                    document.getElementById('nombre').readOnly = false;
-                    document.getElementById('apellido').readOnly = false;
-
-                    alert('Persona no encontrada. Podés cargarla manualmente.');
+                    nombreInput.readOnly = false;
+                    apellidoInput.readOnly = false;
                     guardarBtn.disabled = false; // Habilitar botón
                 }
             });

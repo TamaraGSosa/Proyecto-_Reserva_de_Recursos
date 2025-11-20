@@ -331,7 +331,7 @@ return [
         ],
         [
             'text' => 'Gestión de Usuarios',
-            'url' => '#',
+            'route' => 'usuarios.index',
             'icon'=>'fas fa-users',
             'can' => 'gestionar_usuarios',
         ],
