@@ -9,6 +9,8 @@ use App\Models\Resource;
 use App\Models\StatusReservation;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ConfirmacionReserva;
 
 class ReservationController extends Controller
 {
@@ -165,65 +167,89 @@ class ReservationController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-
-        if (!Auth::check()) {
-            return redirect()->back()->withErrors(['auth' => 'Debes estar autenticado para crear una reserva.']);
-        }
-
-        // Validación base
-        $request->validate([
-            'start_time' => 'required|date',
-            'end_time' => 'required|date|after:start_time',
-            'resource_id' => 'required|array|min:1',
-            'resource_id.*' => 'exists:resources,id',
-        ]);
-
-        // Si es personal, usar su propio profile y estado Pendiente
-        if (Auth::user()->roles->contains('name', 'personal')) {
-            $profile = Auth::user()->profile;
-            if (!$profile) {
-                return redirect()->back()->withErrors(['profile' => 'No tienes un perfil configurado.']);
-            }
-            $statusId = 1; // Pendiente para personal
-        } else {
-            // Para administradores, validar persona y permitir elegir estado
-            $request->validate([
-                'dni' => 'required|string|max:20',
-                'first_name' => 'required|string|max:255',
-                'last_name' => 'required|string|max:255',
-                'status_id' => 'required|in:1,2', // Solo Pendiente o En curso
-            ]);
-
-            // 2️⃣ Persona
-            $person = Person::firstOrCreate(
-                ['DNI' => $request->dni],
-                ['first_name' => $request->first_name, 'last_name' => $request->last_name]
-            );
-
-            // 3️⃣ Profile
-            $profile = Profile::firstOrCreate(
-                ['person_id' => $person->id],
-                ['user_id' => Auth::id()]
-            );
-
-            $statusId = $request->status_id;
-        }
-
-        // 4️⃣ Reserva
-        $reservation = Reservation::create([
-            'profile_id' => $profile->id,
-            'status_reservation_id' => $statusId,
-            'start_time' => $request->start_time,
-            'end_time' => $request->end_time,
-            'create_by_user_id' => Auth::id(),
-        ]);
-
-        // 5️⃣ Asignar recursos
-        $reservation->resources()->attach($request->resource_id);
-
-        return redirect()->route('reservations.index')->with('success', 'Reserva creada correctamente');
+{
+    if (!Auth::check()) {
+        return redirect()->back()->withErrors(['auth' => 'Debes estar autenticado para crear una reserva.']);
     }
+
+    // 🔹 Validación base para todos (personal y admin)
+    $request->validate([
+        'start_time' => 'required|date',
+        'end_time' => 'required|date|after:start_time',
+        'resource_id' => 'required|array|min:1',
+        'resource_id.*' => 'exists:resources,id',
+        'email' => 'required|email',   // 🔥 AGREGADO
+    ]);
+
+    // Si es personal, usar su propio profile y estado Pendiente
+    if (Auth::user()->roles->contains('name', 'personal')) {
+        $profile = Auth::user()->profile;
+
+        if (!$profile) {
+            return redirect()->back()->withErrors(['profile' => 'No tienes un perfil configurado.']);
+        }
+
+        $statusId = 1; // Pendiente para personal
+        $person = $profile->person; // Necesario para el correo
+    } 
+    else {
+        // 🔹 Validación adicional SOLO para administradores
+        $request->validate([
+            'dni' => 'required|string|max:20',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'status_id' => 'required|in:1,2',
+        ]);
+
+        // Crear o buscar persona
+        $person = Person::firstOrCreate(
+            ['DNI' => $request->dni],
+            [
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email
+            ]
+        );
+
+        // Crear o buscar perfil
+        $profile = Profile::firstOrCreate(
+            ['person_id' => $person->id],
+            ['user_id' => Auth::id()]
+        );
+
+        $statusId = $request->status_id;
+    }
+
+    // 🔥 Crear reserva
+    $reservation = Reservation::create([
+        'profile_id' => $profile->id,
+        'status_reservation_id' => $statusId,
+        'start_time' => $request->start_time,
+        'end_time' => $request->end_time,
+        'create_by_user_id' => Auth::id(),
+    ]);
+
+    // 🔥 Asignar recursos
+    $reservation->resources()->attach($request->resource_id);
+    $reservation->load('resources');
+
+    // 🔥 Preparar datos para el correo
+    $resourceNames = $reservation->resources->pluck('name')->join(', ');
+
+    $mailData = [
+        'nombre' => $person->first_name . ' ' . $person->last_name,
+        'email' => $request->email,
+        'producto' => $resourceNames,
+        'fecha' => date('Y-m-d H:i', strtotime($reservation->start_time))
+    ];
+
+    // 🔥 Enviar correo
+    Mail::to($request->email)->send(new ConfirmacionReserva($mailData));
+
+    return redirect()->route('reservations.index')->with('success', 'Reserva creada correctamente');
+}
+
 
 
     /**

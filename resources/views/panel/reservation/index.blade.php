@@ -259,6 +259,12 @@
                     <x-adminlte-input name="last_name" id="last_name" label="Apellido" placeholder="Apellido" required readonly />
                 </div>
             </div>
+            <div class="row">
+    <div class="col-md-6 col-12 mb-2">
+        <x-adminlte-input type="email" name="email" id="email" label="Correo electrónico" placeholder="email@example.com" required />
+    </div>
+</div>
+
 
             <div class="d-flex justify-content-end mt-3">
                 <button type="submit" class="btn btn-primary">Guardar</button>

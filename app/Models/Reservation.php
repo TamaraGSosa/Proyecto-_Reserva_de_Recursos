@@ -13,6 +13,11 @@ class Reservation extends Model
     protected $fillable=[
         'profile_id','status_reservation_id','start_time','end_time', 'create_by_user_id',
     ];
+    protected $casts = [
+    'start_time' => 'datetime',
+    'end_time' => 'datetime',
+    ];
+
     public function profile(){
         return $this->belongsTo(Profile::class,'profile_id');
 

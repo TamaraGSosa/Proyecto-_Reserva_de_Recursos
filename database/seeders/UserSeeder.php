@@ -45,8 +45,8 @@ class UserSeeder extends Seeder
 
         // Personal 2
         $user2 = User::create([
-            'name' => 'personal2',
-            'email' => 'personal2@personal.com',
+            'name' => 'cesar rojas',
+            'email' => 'cesar@inbox.mailtrap.io',
             'password' => Hash::make('123456')
         ]);
         $user2->assignRole('personal');
@@ -54,8 +54,8 @@ class UserSeeder extends Seeder
         // Crear persona y profile para personal2
         $person2 = Person::create([
             'DNI' => '87654321',
-            'first_name' => 'María',
-            'last_name' => 'García'
+            'first_name' => 'cesar',
+            'last_name' => 'Rojas'
         ]);
 
         Profile::create([
