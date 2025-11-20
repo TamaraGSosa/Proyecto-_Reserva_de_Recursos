@@ -16,3 +16,4 @@ Route::get('/home', function () {
 });
 
 Route::resource('usuarios', UserController::class)->middleware('auth');
+Route::get('/personas/{dni}', [App\Http\Controllers\PersonController::class, 'search']);

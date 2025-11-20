@@ -57,7 +57,7 @@ class PersonController extends Controller
     }
     public function search($dni)
     {
-        $person = Person::where('dni', $dni)->first();
+        $person = Person::where('dni', $dni)->with('user')->first();
 
         if ($person) {
             return response()->json($person);
