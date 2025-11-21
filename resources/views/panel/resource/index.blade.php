@@ -40,7 +40,7 @@
     </div>
     @endif
 
-<<<<<<< HEAD
+
 
     {{-- Formulario para Reporte PDF --}}
     <div class="row mb-3">
@@ -61,7 +61,7 @@
             </div>
         </div>
     </div>
-=======
+
     @if(session('error'))
     <div class="row mb-3">
         <div class="col-12">
@@ -74,7 +74,7 @@
         </div>
     </div>
     @endif
->>>>>>> 7d7086961ccb0d6cc3a0019247abee02ec7b9523
+
 
     {{-- FILTROS --}}
     <div class="row mb-3">
