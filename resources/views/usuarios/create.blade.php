@@ -20,7 +20,7 @@
 <div class="card">
     <div class="card-body">
         <div id="dniAlert" class="alert alert-danger d-none"></div>
-        <form action="{{ route('usuarios.store') }}" method="POST">
+        <form action="{{ route('usuarios.store') }}" method="POST" autocomplete="off">
             @csrf
 
           
@@ -49,20 +49,11 @@
             
             <div class="form-group">
                 <label for="email">Email</label>
-                <input type="email" name="email" id="email" class="form-control" required>
+                <input type="email" name="email" id="email" class="form-control" required autocomplete="off">
             </div>
             <div id="emailAdvertencia" class="text-danger mt-1"></div>
 
-            <div class="form-group">
-                <label for="password">Contraseña</label>
-                <input type="password" name="password" class="form-control" required>
-            </div>
-
-            <div class="form-group">
-                <label for="password_confirmation">Confirmar Contraseña</label>
-                <input type="password" name="password_confirmation" class="form-control" required>
-            </div>
-
+          
             <div class="form-group">
                 <label for="role">Rol</label>
                 <select name="role" id="role" class="form-control" required>

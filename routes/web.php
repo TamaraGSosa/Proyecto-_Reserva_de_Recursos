@@ -17,3 +17,8 @@ Route::get('/home', function () {
 
 Route::resource('usuarios', UserController::class)->middleware('auth');
 Route::get('/personas/{dni}', [App\Http\Controllers\PersonController::class, 'search']);
+// cambio de contraseña
+Route::middleware('auth')->group(function () {
+    Route::get('/perfil/cambiar-password', [App\Http\Controllers\ProfileController::class, 'editPassword'])->name('profile.password.edit');
+    Route::post('/perfil/cambiar-password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password.update');
+});

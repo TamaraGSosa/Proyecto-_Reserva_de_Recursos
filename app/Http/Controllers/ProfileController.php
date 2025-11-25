@@ -2,64 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Profile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function editPassword()
     {
-        //
+        return view('usuarios.change_password');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function updatePassword(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'current_password' => 'required',
+            'password' => 'required|string|min:8|confirmed',
+        ]);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $user = Auth::user();
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Profile $profile)
-    {
-        //
-    }
+        if (!Hash::check($request->current_password, $user->password)) {
+            return back()->withErrors(['current_password' => 'La contraseña actual no es correcta.']);
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Profile $profile)
-    {
-        //
-    }
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Profile $profile)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Profile $profile)
-    {
-        //
+        return back()->with('success', 'Contraseña actualizada correctamente.');
     }
 }

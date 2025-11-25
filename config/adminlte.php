@@ -335,7 +335,20 @@ return [
             'icon'=>'fas fa-users',
             'can' => 'gestionar_usuarios',
         ],
+        // NUEVO BLOQUE AGREGADO
+        [
+            'header' => 'AJUSTES DE CUENTA',
+        ],
+        [
+            'text' => 'Cambiar Contraseña',
+            'route' => 'profile.password.edit',
+            'icon' => 'fas fa-fw fa-lock',
+        ],
 
+            
+
+
+      
 
 
 
