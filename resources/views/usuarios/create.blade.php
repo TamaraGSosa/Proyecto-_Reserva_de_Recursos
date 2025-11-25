@@ -96,9 +96,14 @@ document.addEventListener('DOMContentLoaded', function () {
         alertBox.classList.add('d-none');
         const dni = dniInput.value;
         fetch(`/personas/${dni}`)
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
-                if (data) {
+                if (data && data.first_name) {
                     nombreInput.value = data.first_name;
                     apellidoInput.value = data.last_name;
 
@@ -109,21 +114,35 @@ document.addEventListener('DOMContentLoaded', function () {
                         emailInput.value = data.user.email;
                         alertBox.textContent = 'Esta persona ya tiene un usuario registrado.';
                         alertBox.classList.remove('d-none');
-                        guardarBtn.disabled = true; // Deshabilitar botón
+                        guardarBtn.disabled = true; 
                     } else {
                         emailInput.value = '';
-                        guardarBtn.disabled = false; // Habilitar botón
+                        guardarBtn.disabled = false; 
                     }
                 } else {
-                    // Si no se encuentra, permitimos cargar manualmente sin alerta intrusiva
+                    // Si no se encuentra, permitimos cargar manualmente
                     nombreInput.value = '';
                     apellidoInput.value = '';
                     emailInput.value = '';
 
                     nombreInput.readOnly = false;
                     apellidoInput.readOnly = false;
-                    guardarBtn.disabled = false; // Habilitar botón
+                    guardarBtn.disabled = false;
+                    
+                    // Aseguramos que no haya alertas visibles
+                    alertBox.classList.add('d-none');
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                // En caso de error, también permitimos la carga manual por seguridad
+                nombreInput.value = '';
+                apellidoInput.value = '';
+                emailInput.value = '';
+                nombreInput.readOnly = false;
+                apellidoInput.readOnly = false;
+                guardarBtn.disabled = false;
+                alertBox.classList.add('d-none');
             });
     });
 });
