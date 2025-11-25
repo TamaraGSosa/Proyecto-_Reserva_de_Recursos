@@ -4,9 +4,14 @@ use App\Http\Controllers\PersonController;
 use App\Http\Controllers\ReservationController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ResourceController;
+use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\UserController;
 use App\Models\Person;
 
+// Rutas de Reportes
+Route::get('/reporte/diario/pdf', [ReporteController::class, 'generarPdfDiario'])->name('reporte.diario.pdf');
+
+// Rutas accesibles para todos los usuarios autenticados
 // Dashboard
 Route::get('/', [ReservationController::class, 'dashboard'])->name('panel.dashboard');
 
