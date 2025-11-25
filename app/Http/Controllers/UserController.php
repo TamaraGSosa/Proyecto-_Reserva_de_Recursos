@@ -36,7 +36,6 @@ class UserController extends Controller
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
             'role' => 'required|string|in:administrador,personal',
         ]);
 
@@ -61,7 +60,7 @@ class UserController extends Controller
             $user = User::create([
                 'name' => $request->nombre . ' ' . $request->apellido,
                 'email' => $request->email,
-                'password' => bcrypt($request->password),
+                'password' => bcrypt($request->dni), // Contraseña por defecto es el DNI
                 'person_id' => $person->id,
             ]);
 
