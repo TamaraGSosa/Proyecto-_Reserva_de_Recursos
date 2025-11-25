@@ -42,4 +42,36 @@ class ReporteController extends Controller
         // 3. Generar y enviar el PDF al navegador
         return $pdf->stream('reporte-diario-' . $fechaFormateada . '.pdf');
     }
+
+    public function generarReporteReservas(Request $request)
+    {
+        $request->validate([
+            'tipo_de_informe' => 'required|in:day,range',
+            'fecha' => 'nullable|date|required_if:tipo_de_informe,day',
+            'fecha_de_inicio' => 'nullable|date|required_if:tipo_de_informe,range',
+            'fecha_final' => 'nullable|date|required_if:tipo_de_informe,range|after_or_equal:fecha_de_inicio',
+        ]);
+
+        $reportType = $request->input('tipo_de_informe');
+        $reservations;
+        $title;
+
+        if ($reportType == 'day') {
+            $fecha = \Carbon\Carbon::parse($request->input('fecha'))->startOfDay();
+            $title = 'Reporte Diario de Reservas (' . $fecha->format('Y-m-d') . ')';
+            $reservations = Reservation::with(['profile.person', 'resources', 'status'])
+                                      ->whereDate('created_at', $fecha)
+                                      ->get();
+        } else { // range
+            $startDate = \Carbon\Carbon::parse($request->input('fecha_de_inicio'))->startOfDay();
+            $endDate = \Carbon\Carbon::parse($request->input('fecha_final'))->endOfDay();
+            $title = 'Reporte de Reservas (' . $startDate->format('Y-m-d') . ' al ' . $endDate->format('Y-m-d') . ')';
+            $reservations = Reservation::with(['profile.person', 'resources', 'status'])
+                                      ->whereBetween('created_at', [$startDate, $endDate])
+                                      ->get();
+        }
+
+        $pdf = Pdf::loadView('pdf.reservas', compact('reservations', 'title'));
+        return $pdf->stream('reporte_reservas.pdf');
+    }
 }

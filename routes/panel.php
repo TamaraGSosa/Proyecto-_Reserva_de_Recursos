@@ -9,7 +9,10 @@ use App\Http\Controllers\UserController;
 use App\Models\Person;
 
 // Rutas de Reportes
-Route::get('/reporte/diario/pdf', [ReporteController::class, 'generarPdfDiario'])->name('reporte.diario.pdf');
+Route::get('/reporte/reservas/pdf', [ReporteController::class, 'generarReporteReservas'])->name('reportes.reservas.pdf');
+Route::get('/reportes/reservas', function () {
+    return view('reportes.reservas');
+})->name('reportes.reservas.index');
 
 // Rutas accesibles para todos los usuarios autenticados
 // Dashboard
