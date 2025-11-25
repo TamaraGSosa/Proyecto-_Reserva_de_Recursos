@@ -50,7 +50,7 @@
                     <h3 class="card-title">Reporte Diario de Recursos Reservados</h3>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('reporte.recursos.pdf.dia') }}" method="GET" target="_blank" class="form-inline">
+                    <form action="{{ route('reporte.recursos.pdf') }}" method="GET" target="_blank" class="form-inline">
                         <div class="form-group mb-2">
                             <label for="fecha_recursos" class="sr-only">Fecha</label>
                             <input type="date" class="form-control" id="fecha_recursos" name="fecha" value="{{ date('Y-m-d') }}">

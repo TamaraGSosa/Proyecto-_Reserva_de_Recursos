@@ -15,16 +15,21 @@
             <i class="fas fa-list"></i> Listado de Recursos
         </h3>
         <div class="card-tools">
-            <!-- Botones de exportación -->
-            <a href="{{ route('recursos.pdf.visualizar') }}" class="btn btn-sm btn-primary" target="_blank">
-                <i class="fas fa-eye"></i> Visualizar PDF
-            </a>
-            <a href="{{ route('recursos.pdf.descargar') }}" class="btn btn-sm btn-danger">
-                <i class="fas fa-file-pdf"></i> Descargar PDF
-            </a>
-            <button type="button" class="btn btn-sm btn-success">
-                <i class="fas fa-plus"></i> Nuevo Recurso
-            </button>
+            <!-- Formulario de exportación con fecha -->
+            <form action="{{ route('reporte.recursos.pdf') }}" method="GET" target="_blank" class="form-inline">
+                <input type="hidden" name="report_type" value="day">
+                <div class="input-group input-group-sm mr-2">
+                    <input type="date" name="fecha" class="form-control" value="{{ date('Y-m-d') }}" required>
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-file-pdf"></i> Generar Reporte
+                        </button>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-sm btn-success ml-2">
+                    <i class="fas fa-plus"></i> Nuevo Recurso
+                </button>
+            </form>
         </div>
     </div>
     <div class="card-body">
